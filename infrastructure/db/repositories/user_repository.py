@@ -23,5 +23,11 @@ class UserRepository:
         await self.session.refresh(user)
         user_id = await database.execute(query)
         return {**user.dict(), "id": user_id}
-        
-    
+
+    async def get_by_email(self, email: str):
+        result = await self.session.execute(
+            select(UserModel).where(UserModel.email == email)
+        )
+        user = result.scalars().first()  # only call once
+        print(user)
+        return user

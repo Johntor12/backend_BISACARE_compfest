@@ -1,6 +1,12 @@
-class User:
-    def __init__(self, id: int, username: str, email: str, hashed_password: str):
-        self.id = id
-        self.username = username
-        self.email = email
-        self.hashed_password = hashed_password
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
