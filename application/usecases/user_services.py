@@ -16,16 +16,17 @@ class UserService:
         # Check if user exists
         existing = await self.repo.get_by_email_or_username(str(data.email), data.username)
         if existing:
-            raise HTTPException(status_code=400, detail="Email sudah digunakan")
+            raise HTTPException(status_code=400, detail="Email atau username sudah digunakan")
 
         # Hash password
-        hashed_password = bcrypt.hashpw(data.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        hashed_password = hash_password(data.password)
 
         # Create user
         new_user = User(
             username=data.username,
             email=str(data.email),
-            hashed_password=hashed_password
+            password=hashed_password,
+            nomor_telepon=data.nomor_telepon
         )
 
         # Save to DB without starting a new transaction
@@ -38,7 +39,7 @@ class UserService:
 
     async def login(self, email: str, password: str):
         user = await self.repo.get_by_email(email)  # async call
-        if not user or not verify_password(password, user.hashed_password):  # sync call
+        if not user or not verify_password(password, user.password):  # sync call
             return None
         token = create_access_token({"sub": user.email})  # sync call
         return {"access_token": token, "token_type": "bearer"}

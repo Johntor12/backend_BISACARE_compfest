@@ -11,8 +11,8 @@ class UserRepository:
     
     async def get_by_email_or_username(self, email: str, username: str):
         result = await self.session.execute(
-            select(UserModel).where(
-                (UserModel.email == email) | (UserModel.username == username)
+            select(User).where(
+                (User.email == email) | (User.username == username)
             )
         )
         return result.scalars().first()
