@@ -36,10 +36,10 @@ class UserService:
         await self.repo.session.refresh(new_user)
         return new_user
 
-    async def login(self, email: str, password: str):
-        user = await self.repo.get_by_email_or_username(email)  # async call
+    async def login(self, identifier: str, password: str):
+        user = await self.repo.get_by_identifier(identifier)  # async call
         if not user or not verify_password(password, user.password):  # sync call
-            return None
+            return HTTPException(status_code=401, detail="Email atau password salah")
         token = create_access_token({"sub": user.email})  # sync call
         return {"access_token": token, "token_type": "bearer"}
 

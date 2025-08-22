@@ -9,7 +9,7 @@ class UserRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
     
-    async def get_by_email_or_username(self, email: str, username: str):
+    async def get_by_email_or_username(self,  email: str, username: str):
         result = await self.session.execute(
             select(User).where(
                 (User.email == email) | (User.username == username)
@@ -17,6 +17,15 @@ class UserRepository:
         )
         return result.scalars().first()
     
+
+    async def get_by_identifier(self, identifier: str):
+        result = await self.session.execute(
+            select(User).where(
+                (User.email == identifier) | (User.username == identifier)
+            )
+        )
+        return result.scalars().first()
+
     async def create_user(self, user: User):
         self.session.add(user)
         await self.session.commit()
