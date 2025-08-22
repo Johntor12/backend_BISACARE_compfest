@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey, Enum, Float
 from sqlalchemy.orm import relationship
 from infrastructure.db.connection import Base
 import enum
@@ -50,3 +50,11 @@ class ClaimModel(Base):
 
     # Claim Tracker
     status = Column(Enum(ClaimStatusEnum), default=ClaimStatusEnum.dikirim, nullable=False)
+
+    # Coverage ring (untuk kartu “Ditanggung” & “Tanggung Sendiri”)
+    covered_percent = Column(Float, default=0.0)   # 0..100
+    patient_percent = Column(Float, default=0.0)   # 0..100
+
+    # Relasi k event and document
+    events = relationship("ClaimEventModel", back_populates="claim")
+    documents = relationship("ClaimDocumentModel", back_populates="claim")

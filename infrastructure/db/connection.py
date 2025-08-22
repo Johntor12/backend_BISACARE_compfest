@@ -21,3 +21,8 @@ Base = declarative_base()
 async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
+
+# @app.get("/chats")
+# def get_chats(db=Depends(get_db)):
+#     repo = ChatRepository(db)
+#     return repo.get_all_chats()

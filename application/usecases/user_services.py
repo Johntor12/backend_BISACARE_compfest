@@ -34,15 +34,14 @@ class UserService:
         await self.repo.session.flush()  # ensures ID is generated
         await self.repo.session.commit()
         await self.repo.session.refresh(new_user)
-
         return new_user
 
     async def login(self, email: str, password: str):
-        user = await self.repo.get_by_email(email)  # async call
+        user = await self.repo.get_by_email_or_username(email)  # async call
         if not user or not verify_password(password, user.password):  # sync call
             return None
         token = create_access_token({"sub": user.email})  # sync call
         return {"access_token": token, "token_type": "bearer"}
 
     def get_current_user(self, email: str):
-        return self.repo.get_by_email(email)
+        return self.repo.get_by_email_or_username(email)
