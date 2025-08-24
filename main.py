@@ -15,7 +15,6 @@ ai_adapter = AIDummyAdapter()
 repo = ChatRepository(Base)
 svc = ChatbotService(repo, ai_adapter)
 
-
 # Lifespan handler (pengganti @app.on_event)
 @asynccontextmanager
 async def lifespan(app: FastAPI):

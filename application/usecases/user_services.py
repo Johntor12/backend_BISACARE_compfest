@@ -37,11 +37,11 @@ class UserService:
         return new_user
 
     async def login(self, email: str, password: str):
-        user = await self.repo.get_by_email_or_username(email)  # async call
-        if not user or not verify_password(password, user.password):  # sync call
+        user = await self.repo.get_by_email_or_username(email, None)  # kirim None untuk username
+        if not user or not verify_password(password, user.password):
             return None
-        token = create_access_token({"sub": user.email})  # sync call
+        token = create_access_token({"sub": user.email})
         return {"access_token": token, "token_type": "bearer"}
 
-    def get_current_user(self, email: str):
-        return self.repo.get_by_email_or_username(email)
+    async def get_current_user(self, email: str):
+        return await self.repo.get_by_email_or_username(email, None)  # tambahkan None untuk username
