@@ -4,3 +4,6 @@ sqlalchemy
 passlib[bcrypt]
 python-jose[cryptography]
 pydantic
+python-dotenv
+pydantic[email]
+databases[postgresql]
