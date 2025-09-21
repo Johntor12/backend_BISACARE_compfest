@@ -50,6 +50,7 @@ async def log_exceptions(request: Request, call_next):
 app.include_router(auth_route.router, prefix="/auth", tags=["Auth"])
 app.include_router(user_route.router, prefix="/users", tags=["Users"])
 app.include_router(claim_route.router, prefix="/claim", tags=["Claims"])
+app.include_router(claim_route.tracker_router, prefix="/claim", tags=["Claims Tracker"])
 app.include_router(testi_route.router, prefix="/testi", tags=["Testi"])
 app.include_router(insurance_form_route.router, prefix="/insuranceform", tags=["Insurance Form"])
 app.include_router(slip_route.router, prefix="/slip", tags=["Slip"])

@@ -7,6 +7,7 @@ from application.usecases.claim_services import ClaimService
 from infrastructure.db.repositories.claim_repository import ClaimRepository
 from infrastructure.db.connection import get_db
 
+# Main claims router
 router = APIRouter(prefix="/claims", tags=["Claims"])
 
 @router.post("/", response_model=Claim)
@@ -48,19 +49,20 @@ async def delete_claim(claim_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Claim not found")
     return {"message": "Claim deleted successfully"}
 
-router = APIRouter(prefix="/claimtracker", tags=["Claims Tracker"])
+# Claims tracker router (separate router)
+tracker_router = APIRouter(prefix="/claimtracker", tags=["Claims Tracker"])
 
 def get_service(session: AsyncSession = Depends(get_db)) -> ClaimService:
     return ClaimService(ClaimRepository(session))
 
-@router.get("/tracker/{user_id}")
+@tracker_router.get("/tracker/{user_id}")
 async def claim_tracker(user_id: int, service: ClaimService = Depends(get_service)):
     return await service.get_claim_tracker(user_id)
 
-@router.get("/{claim_id}/slip-digital")
+@tracker_router.get("/{claim_id}/slip-digital")
 async def slip_digital(claim_id: int, service: ClaimService = Depends(get_service)):
     return await service.get_slip_digital(claim_id)
 
-@router.get("/{claim_id}/progress")
+@tracker_router.get("/{claim_id}/progress")
 async def claim_progress(claim_id: int, service: ClaimService = Depends(get_service)):
     return await service.get_claim_progress(claim_id)
