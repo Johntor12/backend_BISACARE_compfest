@@ -9,29 +9,60 @@ class UserRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
     
-    async def get_by_email_or_username(self,  email: str, username: str):
-        result = await self.session.execute(
-            select(User).where(
-                (User.email == email) | (User.username == username)
-            )
+    async def get_by_email_or_username(self,  email: str, identifier: str) -> User | None :
+        query = select(UserModel).where(
+            (UserModel.email == identifier) | (UserModel.username == identifier)
         )
-        return result.scalars().first()
-    
+        result = await self.session.execute(query)
+        if not result:
+            return None
+            
+        model = result.scalars().first()
+        if model:
+            return User(
+                id=model.id,
+                username=model.username,
+                email=model.email,
+                password=model.password,
+                nomor_telepon=model.nomor_telepon
+            )
+        return None
 
     async def get_by_identifier(self, identifier: str):
         result = await self.session.execute(
-            select(User).where(
-                (User.email == identifier) | (User.username == identifier)
+            select(UserModel).where(
+                (UserModel.email == identifier) | (UserModel.username == identifier)
             )
         )
-        return result.scalars().first()
+        model = result.scalars().first()
+        if model:
+            return User(
+                id=model.id,
+                username=model.username,
+                email=model.email,
+                password=model.password,
+                nomor_telepon=model.nomor_telepon
+            )
+        return None
 
-    async def create_user(self, user: User):
-        self.session.add(user)
+    async def create_user(self, user: User) -> User:
+        model = UserModel(
+            username=user.username,
+            email=user.email,
+            password=user.password,
+            nomor_telepon=user.nomor_telepon
+        )
+        self.session.add(model)
         await self.session.commit()
-        await self.session.refresh(user)
-        user_id = await database.execute()
-        return {**user.dict(), "id": user_id}
+        await self.session.refresh(model)
+        # 3. Mapping kembali ke Entity
+        return User(
+            id=model.id,
+            username=model.username,
+            email=model.email,
+            password=model.password,
+            nomor_telepon=model.nomor_telepon
+        )
 
     # async def get_by_email(self, email: str):
     #     result = await self.session.execute(

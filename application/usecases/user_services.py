@@ -1,12 +1,21 @@
+import os
 from domain.entities.user import User
 from infrastructure.db.repositories.user_repository import UserRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.security import hash_password, verify_password, create_access_token
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from jose import JWTError, jwt
 import bcrypt
+from infrastructure.db.connection import get_db
 
 from schemas.user_schema import UserCreate
 
+oauth2_scheme = HTTPBearer()
+
+SECRET_KEY = os.getenv("SECRET_KEY", "backend_BISACARE")  # default if not set
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
 class UserService:
     def __init__(self, session: AsyncSession):
@@ -30,11 +39,8 @@ class UserService:
         )
 
         # Save to DB without starting a new transaction
-        self.repo.session.add(new_user)
-        await self.repo.session.flush()  # ensures ID is generated
-        await self.repo.session.commit()
-        await self.repo.session.refresh(new_user)
-        return new_user
+        saved_user = await self.repo.create_user(new_user)
+        return saved_user
 
     async def login(self, identifier: str, password: str):
         user = await self.repo.get_by_identifier(identifier)  # async call
@@ -43,5 +49,29 @@ class UserService:
         token = create_access_token({"sub": user.email})  # sync call
         return {"access_token": token, "token_type": "bearer"}
 
-    def get_current_user(self, email: str):
-        return self.repo.get_by_email_or_username(email)
+    async def get_current_user(self, credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)):
+        if not credentials or not credentials.scheme:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        print("DEBUG CREDENTIALS:", credentials.scheme, credentials.credentials[:30])  # <--- tambahkan ini
+        
+        token = credentials.credentials
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            email: str = payload.get("sub")
+            if email is None:
+                raise HTTPException(status_code=401, detail="Token tidak valid")
+        except JWTError:
+            raise HTTPException(status_code=401, detail="Token tidak dapat diverifikasi")
+        
+        user = await self.repo.get_by_identifier(identifier=email)
+        if not user:
+            raise HTTPException(status_code=401, detail="User tidak ditemukan")
+        return user
+    
+async def get_current_user_service(
+    db: AsyncSession = Depends(get_db),  # nanti diisi get_db
+    credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)
+):
+    service = UserService(db)   
+    return await service.get_current_user(credentials)

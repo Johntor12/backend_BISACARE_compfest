@@ -13,7 +13,7 @@ router = APIRouter(prefix="/bot", tags=["Chatbot"])
 @router.post("/sessions", response_model=SessionOut)
 async def create_session(payload: SessionCreate, session: AsyncSession = Depends(get_db)):
     repo = ChatRepository(session)
-    svc = ChatbotService(repo, ai_adapter_dummy)  # replace ai_adapter_dummy with real adapter
+    svc = ChatbotService(repo, ai_adapter_dummy)
     s = await svc.start_session(payload.user_id, payload.title)
     return s
 

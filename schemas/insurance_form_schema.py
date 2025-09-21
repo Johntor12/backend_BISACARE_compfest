@@ -7,19 +7,23 @@ class InsuranceFormRequest(BaseModel):
     ktp_url: Optional[str]
     insurance_card_url: Optional[str]
     policy_number: str
+    rekening_type: Literal["BCA", "MANDIRI", "BNI", "BRI", "CIMB NIAGA", "PERMATA BANK", "BANK DANAMON", "BSI"] = "BCA"
+    rekening_number: Optional[str]    
     service_type: Literal["rawat_jalan", "rawat_inap", "igd", "lainnya"]
-    other_service: Optional[str] = None
+    other_service: Optional[str] | None
     phone_number: str
-    complaint: Optional[str] = None
+    complaint: str
 
 
 class InsuranceFormResponse(BaseModel):
     form_id: Optional[int]  # Accept None temporarily
-    ktp_url: str
-    insurance_card_url: str
+    ktp_url: Optional[str]
+    insurance_card_url: Optional[str]
     policy_number: str
-    service_type: str
-    other_service: str | None
+    rekening_type: Literal["BCA", "MANDIRI", "BNI", "BRI", "CIMB NIAGA", "PERMATA BANK", "BANK DANAMON", "BSI"] = "BCA"
+    rekening_number: Optional[str]    
+    service_type: Literal["rawat_jalan", "rawat_inap", "igd", "lainnya"]
+    other_service: Optional[str] | None
     phone_number: str
     complaint: str
     created_at: datetime

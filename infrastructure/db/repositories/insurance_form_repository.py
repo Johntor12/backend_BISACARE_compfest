@@ -6,6 +6,7 @@ import logging
 from sqlalchemy.future import select
 from sqlalchemy import update, delete
 from typing import Optional, List, Dict
+from schemas.insurance_form_schema import InsuranceFormResponse
 
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,18 @@ class InsuranceFormRepository:
 
     async def create_insurance_form(self, form: InsuranceForm) -> InsuranceFormModel:
         try:
-            db_form = InsuranceFormModel(**form.model_dump())
+            db_form = InsuranceFormModel(
+                ktp_url=form.ktp_url,
+                insurance_card_url=form.insurance_card_url,
+                policy_number=form.policy_number,
+                rekening_type=form.rekening_type,
+                rekening_number=form.rekening_number,
+                service_type=form.service_type,
+                other_service=form.other_service,
+                phone_number=form.phone_number,
+                complaint=form.complaint,
+                created_at=form.created_at
+            )
             self.db.add(db_form)
             await self.db.commit()
             await self.db.refresh(db_form)
@@ -27,7 +39,7 @@ class InsuranceFormRepository:
             raise e
 
 
-    async def get_all_insurance_form(self) -> List[InsuranceFormModel]:
+    async def get_all_insurance_form(self) -> List[InsuranceFormResponse]:
         try:
             result = await self.db.execute(select(InsuranceFormModel))
             return result.scalars().all()
@@ -36,7 +48,7 @@ class InsuranceFormRepository:
             raise e
 
 
-    async def get_insurance_form_by_id(self, form_id: int) -> Optional[InsuranceFormModel]:
+    async def get_insurance_form_by_id(self, form_id: int) -> Optional[InsuranceFormResponse]:
         try:
             result = await self.db.execute(
                 select(InsuranceFormModel)
@@ -49,7 +61,7 @@ class InsuranceFormRepository:
             logger.error(f"[Repository Error][GET_BY_ID] {str(e)}", exc_info=True)
             raise e
 
-    async def update_insurance_form_by_id(self, form_id: int, insuranceForm: dict) -> Optional[InsuranceFormModel]:
+    async def update_insurance_form_by_id(self, form_id: int, insuranceForm: dict) -> Optional[InsuranceFormResponse]:
         try:
             # kalau Pydantic model → jadikan dict
             if hasattr(insuranceForm, "dict"):

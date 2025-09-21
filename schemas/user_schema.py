@@ -25,3 +25,12 @@ class UserOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class UserData(BaseModel):
+    id: int
+    username: str
+    email: str
+    nomor_telepon: str
+    
+    class Config:
+        orm_mode = True

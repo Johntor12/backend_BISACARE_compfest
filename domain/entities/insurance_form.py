@@ -7,8 +7,10 @@ class InsuranceForm(BaseModel):
     ktp_url: Optional[str]
     insurance_card_url: Optional[str]
     policy_number: str
+    rekening_type: Literal["BCA", "MANDIRI", "BNI", "BRI", "CIMB NIAGA", "PERMATA BANK", "BANK DANAMON", "BSI"] = "BCA"
+    rekening_number: Optional[str] =  "0123456789"    
     service_type: Literal["rawat_jalan", "rawat_inap", "igd", "lainnya"]
-    other_service: Optional[str] = None
+    other_service: Optional[str] | None = None
     phone_number: str
-    complaint: Optional[str]
+    complaint: str
     created_at: datetime = datetime.now()

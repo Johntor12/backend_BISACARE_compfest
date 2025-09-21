@@ -1,22 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from core.security import decode_access_token
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 from infrastructure.db.connection import get_db
-from application.usecases.user_services import UserService
-from infrastructure.db.repositories.user_repo_impl import UserRepositoryImpl
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+from application.usecases.user_services import UserService, get_current_user_service
+from schemas.user_schema import UserData
 
 router = APIRouter()
 
-@router.get("/me")
-def get_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    payload = decode_access_token(token)
-    if not payload:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-    email = payload.get("sub")
-    service = UserService(UserRepositoryImpl(db))
-    user = service.get_current_user(email)
-    return {"email": user.email, "username": user.username}
+@router.get("/me", response_model=UserData)
+async def get_me(current_user = Depends(get_current_user_service)):
+    return current_user

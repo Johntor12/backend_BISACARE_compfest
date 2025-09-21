@@ -1,13 +1,12 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import declarative_base
+# domain/entities/user.py
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 
-Base = declarative_base()
-
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String, unique=True, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-    password = Column(String, nullable=False)
-    nomor_telepon = Column(String, nullable=False)
+class User(BaseModel):
+    id: int | None = None
+    username: str
+    email: EmailStr
+    password: str
+    nomor_telepon: str
+    insurance_form_id: Optional[int] | None = None
+    slip_id: Optional[int] | None = None
