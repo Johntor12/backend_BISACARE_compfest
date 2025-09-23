@@ -18,12 +18,13 @@ ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
 class UserService:
-    def __init__(self, session: AsyncSession):
-        self.repo = UserRepository(session)
+    
 
-    async def register(self, data: UserCreate):
+    async def register(self, data: UserCreate, db: AsyncSession):
+        repo = UserRepository(db)
+
         # Check if user exists
-        existing = await self.repo.get_by_email_or_username(str(data.email), data.username)
+        existing = await repo.get_by_email_or_username(str(data.email), data.username)
         if existing:
             raise HTTPException(status_code=400, detail="Email atau username sudah digunakan")
 
@@ -39,17 +40,21 @@ class UserService:
         )
 
         # Save to DB without starting a new transaction
-        saved_user = await self.repo.create_user(new_user)
+        saved_user = await repo.create_user(new_user)
         return saved_user
 
-    async def login(self, identifier: str, password: str):
-        user = await self.repo.get_by_identifier(identifier)  # async call
+    async def login(self, identifier: str, password: str, db: AsyncSession):
+        repo = UserRepository(db)
+
+        user = await repo.get_by_identifier(identifier)  # async call
         if not user or not verify_password(password, user.password):  # sync call
             return HTTPException(status_code=401, detail="Email atau password salah")
         token = create_access_token({"sub": user.email})  # sync call
         return {"access_token": token, "token_type": "bearer"}
 
-    async def get_current_user(self, credentials: HTTPAuthorizationCredentials):
+    async def get_current_user(self, credentials: HTTPAuthorizationCredentials, db: AsyncSession):
+        repo = UserRepository(db)
+
         if not credentials or not credentials.scheme:
             raise HTTPException(status_code=401, detail="Not authenticated")
 
@@ -64,7 +69,7 @@ class UserService:
         except JWTError:
             raise HTTPException(status_code=401, detail="Token tidak dapat diverifikasi")
         
-        user = await self.repo.get_by_identifier(identifier=email)
+        user = await repo.get_by_identifier(identifier=email)
         if not user:
             raise HTTPException(status_code=401, detail="User tidak ditemukan")
         return user

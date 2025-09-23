@@ -10,5 +10,5 @@ async def get_current_user_service(
     db: AsyncSession = Depends(get_db),
     credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)
 ):
-    service = UserService(db)
-    return await service.get_current_user(credentials)
+    service = UserService()
+    return await service.get_current_user(credentials, db)

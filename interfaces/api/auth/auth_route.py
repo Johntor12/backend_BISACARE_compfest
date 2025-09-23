@@ -16,9 +16,9 @@ router = APIRouter()
 
 @router.post("/register", response_model=UserResponse)
 async def register(data: UserCreate, db: AsyncSession = Depends(get_db)):
-    service = UserService(db)
+    service = UserService()
     try:
-        return await service.register(data)
+        return await service.register(data, db)
 
     except ValueError as e:
         logger.warning(f"Validation error: {e}")
@@ -33,9 +33,9 @@ async def register(data: UserCreate, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @router.post("/login")
-async def login(user: UserLogin, db: AsyncSession = Depends(get_db )):
-    service = UserService(db)
-    token = await service.login(user.email, user.password)
+async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
+    service = UserService()
+    token = await service.login(user.email, user.password, db)
     if not token:
         raise HTTPException(status_code=400, detail="Invalid credentials")
     return token
