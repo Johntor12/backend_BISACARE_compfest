@@ -9,3 +9,4 @@ pydantic[email]
 databases[postgresql]
 supabase
 alembic
+python-multipart
