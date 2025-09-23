@@ -3,12 +3,17 @@ from supabase import create_client, Client
 from fastapi import UploadFile
 from uuid import uuid4
 
+
+
 class SupabaseStorage:
     def __init__(self):
         self.url = os.getenv("SUPABASE_URL")
         self.key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")  # pakai service role key
         self.bucket = os.getenv("SUPABASE_BUCKET", "insurance-forms")
         self.client: Client = create_client(self.url, self.key)
+
+        if not self.url or not self.key:
+            raise RuntimeError("Supabase ENV variables is missing!")
 
     async def upload_file(self, file: UploadFile, prefix: str) -> str:
         ext = file.filename.split(".")[-1]
