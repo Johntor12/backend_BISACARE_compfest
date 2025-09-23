@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from infrastructure.db.connection import get_db
 from application.usecases.slip_services import SlipService
 from schemas.slip_schema import SlipCreate, SlipUpdate, SlipResponse
-from application.usecases.user_services import UserService, get_current_user_service
+from application.usecases.user_services import UserService
+from application.usecases.helper.get_current_user_service import get_current_user_service
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 router = APIRouter()

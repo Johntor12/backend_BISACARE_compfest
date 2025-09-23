@@ -49,7 +49,7 @@ class UserService:
         token = create_access_token({"sub": user.email})  # sync call
         return {"access_token": token, "token_type": "bearer"}
 
-    async def get_current_user(self, credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)):
+    async def get_current_user(self, credentials: HTTPAuthorizationCredentials):
         if not credentials or not credentials.scheme:
             raise HTTPException(status_code=401, detail="Not authenticated")
 
@@ -68,11 +68,3 @@ class UserService:
         if not user:
             raise HTTPException(status_code=401, detail="User tidak ditemukan")
         return user
-    
-async def get_current_user_service(
-    db: AsyncSession = Depends(get_db),  # nanti diisi get_db
-    credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)
-):
-    service = UserService(db)   
-    user = await service.get_current_user(credentials)
-    return user
