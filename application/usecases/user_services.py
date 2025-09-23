@@ -74,4 +74,5 @@ async def get_current_user_service(
     credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)
 ):
     service = UserService(db)   
-    return await service.get_current_user(credentials)
+    user = await service.get_current_user(credentials)
+    return user

@@ -64,6 +64,7 @@ class UserRepository:
             nomor_telepon=model.nomor_telepon
         )
 
+
     # async def get_by_email(self, email: str):
     #     result = await self.session.execute(
     #         select(UserModel).where(UserModel.email == email)

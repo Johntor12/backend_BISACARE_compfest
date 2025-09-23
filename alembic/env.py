@@ -1,48 +1,50 @@
+import asyncio
+import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from infrastructure.db.connection import Base
+from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import create_async_engine
 from alembic import context
-from infrastructure.db.models.user_model import UserModel
-from infrastructure.db.models.claim_model import ClaimModel
-from infrastructure.db.models.testi_model import TestiModel
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+# ----------------------------
+# CONFIG LOGGING
+# ----------------------------
 config = context.config
-
-
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
+# ----------------------------
+# IMPORT METADATA
+# ----------------------------
+# Pastikan Base metadata dari project kamu diimport
+from infrastructure.db.connection import Base
+# import semua model supaya metadata lengkap
+from infrastructure.db.models.user_model import UserModel
+from infrastructure.db.models.claim_model import ClaimModel
+from infrastructure.db.models.testi_model import TestiModel
+from infrastructure.db.models.insurance_form_model import InsuranceFormModel
+from infrastructure.db.models.slip_model import SlipModel
+from infrastructure.db.models.chat_model import ChatMessageModel, ChatSessionModel
+from infrastructure.db.models.claim_document_model import ClaimDocumentModel
+from infrastructure.db.models.claim_event_model import ClaimEventModel
+
 target_metadata = Base.metadata
-# target_metadata = None
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+# ----------------------------
+# DATABASE URL
+# ----------------------------
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+asyncpg://neondb_owner:npg_Diz4OWJ3VoAk@ep-noisy-sea-adgcl31n.c-2.us-east-1.aws.neon.tech/neondb?ssl=require"
+)
 
-
-def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
-    """
-    url = config.get_main_option("sqlalchemy.url")
+# ----------------------------
+# OFFLINE MIGRATION (tidak perlu koneksi)
+# ----------------------------
+def run_migrations_offline():
+    """Run migrations in 'offline' mode."""
+    url = DATABASE_URL
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -53,29 +55,40 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+# ----------------------------
+# HELPER SYNC FUNCTION UNTUK ONLINE MIGRATION
+# ----------------------------
+def run_migrations_sync(connection: Connection):
+    """Fungsi sync yang dipanggil di run_sync"""
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        compare_type=True,  # penting untuk autogenerate enum/column type changes
+    )
+    with context.begin_transaction():
+        context.run_migrations()
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
+# ----------------------------
+# ONLINE MIGRATION (async engine)
+# ----------------------------
+def run_migrations_online():
+    """Run migrations using async engine."""
+    connectable = create_async_engine(
+        DATABASE_URL,
         poolclass=pool.NullPool,
+        echo=True  # bisa diubah False di production
     )
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+    async def do_run_migrations():
+        async with connectable.connect() as connection:
+            await connection.run_sync(run_migrations_sync)
+        await connectable.dispose()
 
-        with context.begin_transaction():
-            context.run_migrations()
+    asyncio.run(do_run_migrations())
 
-
+# ----------------------------
+# MAIN EXECUTION
+# ----------------------------
 if context.is_offline_mode():
     run_migrations_offline()
 else:

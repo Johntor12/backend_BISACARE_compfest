@@ -14,7 +14,7 @@ class UserModel(Base):
     # Relasi ke Claim
     claims = relationship("ClaimModel", back_populates="user", uselist=False)
 
-    # insurance_forms = relationship("InsuranceFormModel", back_populates="user", cascade="all, delete-orphan")
+    insurance_forms = relationship("InsuranceFormModel", back_populates="user", cascade="all, delete-orphan")
 
 
     #Relasi ke Slip Digital
