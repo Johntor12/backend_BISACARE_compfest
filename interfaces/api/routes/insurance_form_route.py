@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, status, File 
 from sqlalchemy.ext.asyncio import AsyncSession
 from infrastructure.db.repositories.insurance_form_repository import InsuranceFormRepository
 from application.usecases.insurance__form_services import InsuranceFormService
-from interfaces.api.routes.slip_route import get_current_user_id
+from application.usecases.helper.get_current_user_service import get_current_user_service
 from schemas.insurance_form_schema import InsuranceFormRequest, InsuranceFormResponse
 from infrastructure.db.connection import get_db
 from infrastructure.storage.supabase_storage import SupabaseStorage
@@ -27,7 +27,7 @@ async def create_form(
     ktp_file: UploadFile = File(None),
     insurance_card_file: UploadFile = File(None),
     db: AsyncSession = Depends(get_db),
-    current_user_id: int = Depends(get_current_user_id)
+    current_user_id = Depends(get_current_user_service)
     ):
     repo = InsuranceFormRepository(db)
     storage = SupabaseStorage()
@@ -42,7 +42,7 @@ async def create_form(
             phone_number=phone_number,
             complaint=complaint,
             created_at=datetime.now(),
-            user_id=current_user_id
+            user_id=current_user_id.id
     )
     try:
         result = await service.create_form(req, ktp_file, insurance_card_file, current_user_id)    
