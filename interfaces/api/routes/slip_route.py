@@ -19,20 +19,20 @@ async def get_current_user_id(
 
 @router.post("/", response_model=SlipResponse, status_code=status.HTTP_201_CREATED)
 async def create_slip(data: SlipCreate, db: AsyncSession = Depends(get_db),current_user: int = Depends(get_current_user_service)):
-    return await SlipService(db).create_slip(data, current_user)
+    return await SlipService(db).create_slip(data, current_user.id)
 
 @router.get("/{slip_id}", response_model=SlipResponse)
 async def get_slip(slip_id: int, db: AsyncSession = Depends(get_db),current_user: int = Depends(get_current_user_service)):
-    return await SlipService(db).get_slip(slip_id, current_user)
+    return await SlipService(db).get_slip(slip_id, current_user.id)
 
 @router.get("/", response_model=list[SlipResponse])
 async def get_user_slips(db: AsyncSession = Depends(get_db),current_user: int = Depends(get_current_user_service)):
-    return await SlipService(db).get_user_slips(current_user)
+    return await SlipService(db).get_user_slips(current_user.id)
 
 @router.put("/{slip_id}", response_model=SlipResponse)
 async def update_slip(slip_id: int, data: SlipUpdate, db: AsyncSession = Depends(get_db),current_user: int = Depends(get_current_user_service)):
-    return await SlipService(db).update_slip(slip_id, data, current_user)
+    return await SlipService(db).update_slip(slip_id, data, current_user.id)
 
 @router.delete("/{slip_id}")
 async def delete_slip(slip_id: int, db: AsyncSession = Depends(get_db),current_user: int = Depends(get_current_user_service)):
-    return await SlipService(db).delete_slip(slip_id, current_user)
+    return await SlipService(db).delete_slip(slip_id, current_user.id)
