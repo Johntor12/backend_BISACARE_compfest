@@ -1,0 +1,35 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Alembic migration cache
+alembic/versions/*.pyc
+
+# Byte-compiled
+*.egg-info
+.eggs/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+
+# Git
+.git
+.gitignore
+
+# Docker files
+Dockerfile
+docker-compose.yml

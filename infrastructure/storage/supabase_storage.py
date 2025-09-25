@@ -25,10 +25,13 @@ class SupabaseStorage:
 
         # Ambil URL (kalau bucket public)
         public_url = self.client.storage.from_(self.bucket).get_public_url(unique_name)
-        # if isinstance(public_url, dict):
-            # supabase-py older/newer differences, try common keys
-            # return public_url.get("publicUrl") or public_url.get("public_url") or public_url.get("url") or str(public_url)
-        return public_url
+        if isinstance(public_url, dict):
+            return public_url.get("publicURL") or public_url.get("public_url") or str(public_url)
+        # or supabase client may return an object with 'public_url' attribute
+        try:
+            return public_url # type: ignore
+        except Exception:
+            return str(public_url)
 
     def generate_signed_url(self, filename: str, expires_in: int = 3600) -> str:
         """Hanya untuk bucket private"""

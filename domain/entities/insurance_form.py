@@ -4,7 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 class InsuranceForm(BaseModel):
-    form_id: int
+    form_id: Optional[int]
     ktp_url: Optional[str] = None
     insurance_card_url: Optional[str] = None
     policy_number: str

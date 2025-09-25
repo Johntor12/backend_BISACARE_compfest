@@ -40,11 +40,12 @@ class ClaimRepository:
         result = await self.session.execute(select(ClaimModel)
                                                 .where(ClaimModel.user_id == user_id))
         claim = result.scalars().all()
+        return Claim(**claim.__dict__) if claim else None
 
     async def update_claim(self, claim_id: int, claim: Claim) -> Optional[ClaimModel]:
         claim = await self.get_claim_by_id(claim_id)
         if not claim:
-            None
+            raise HTTPException(status_code=404, detail="Claim tidak ditemukan")
         claim.user_id = claim.user_id
         claim.status = claim.status
         await self.session.commit()
@@ -54,7 +55,7 @@ class ClaimRepository:
     async def update_claim_status(self, claim_id: int, status: str):
         claim = await self.get_claim_by_id(claim_id)
         if not claim:
-            None
+            raise HTTPException(status_code=404, detail="Claim tidak ditemukan")
         claim.status = status
         await self.session.commit()
         await self.session.refresh(claim)
@@ -63,7 +64,7 @@ class ClaimRepository:
     async def delete_claim(self, claim_id: int) -> bool:
         claim = await self.get_claim_by_id(claim_id)
         if not claim:
-            return False
+                        raise HTTPException(status_code=404, detail="Claim tidak ditemukan")
         await self.session.delete(claim)
         await self.session.commit()
         return True

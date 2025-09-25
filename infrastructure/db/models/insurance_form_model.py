@@ -15,7 +15,7 @@ class RekeningTypeEnum(str, enum.Enum):
 class InsuranceFormModel(Base):
     __tablename__ = "insurance_forms"
  
-    form_id = Column(Integer, primary_key=True, index=True)
+    form_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     ktp_url = Column(String, nullable=True)
     insurance_card_url = Column(String, nullable=True)
     policy_number = Column(String, nullable=False)
@@ -27,5 +27,5 @@ class InsuranceFormModel(Base):
     complaint = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     user = relationship("UserModel", back_populates="insurance_forms")

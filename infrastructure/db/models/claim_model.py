@@ -13,7 +13,7 @@ class ClaimStatusEnum(str, enum.Enum):
 class ClaimModel(Base):
     __tablename__ = "claims"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
 
 
     # Relasi ke User

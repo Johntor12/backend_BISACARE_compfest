@@ -6,7 +6,7 @@ import logging
 from sqlalchemy.future import select
 from sqlalchemy import update, delete
 from typing import Optional, List, Dict
-from schemas.insurance_form_schema import InsuranceFormResponse
+from schemas.insurance_form_schema import InsuranceFormResponse, InsuranceFormRequest
 from datetime import datetime
 
 
@@ -16,29 +16,16 @@ class InsuranceFormRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create_insurance_form(self, db_form: InsuranceForm):
+    async def create_insurance_form(self, form: InsuranceFormModel) -> InsuranceFormModel:
         try:
-            new_db_form = InsuranceFormModel(
-                ktp_url=db_form.ktp_url,
-                insurance_card_url=db_form.insurance_card_url,
-                policy_number=db_form.policy_number,
-                rekening_type=db_form.rekening_type,
-                rekening_number=db_form.rekening_number,
-                service_type=db_form.service_type,
-                other_service=db_form.other_service,
-                phone_number=db_form.phone_number,
-                complaint=db_form.complaint,
-                created_at=datetime.now(),
-            )
-            self.db.add(new_db_form)
+            self.db.add(form)
             await self.db.commit()
-            await self.db.refresh(db_form)
-            return db_form
+            await self.db.refresh(form)
+            return form
         except SQLAlchemyError as e:
             await self.db.rollback()
             logger.error(f"[Repository Error][CREATE] {str(e)}", exc_info=True)
             raise e
-
 
     async def get_all_insurance_form(self) -> List[InsuranceFormModel]:
         try:
@@ -61,13 +48,22 @@ class InsuranceFormRepository:
         except SQLAlchemyError as e:
             logger.error(f"[Repository Error][GET_BY_ID] {str(e)}", exc_info=True)
             raise e
+        
+    
 
-    async def update_insurance_form_by_id(self, form_id: int, update_data: dict):
+    async def update_insurance_form_by_id(self, form_id: int, update_data: dict, ktp_url: Optional[str] = None, insurance_card_url: Optional[str] = None) -> Optional[InsuranceFormModel]:
         try:
+
+            if(ktp_url):
+                InsuranceForm["ktp_url"] = ktp_url
+            if(insurance_card_url):
+                InsuranceForm["insurance_card_url"] = insurance_card_url
+
             await self.db.execute(
                 update(InsuranceFormModel)
                 .where(InsuranceFormModel.form_id==form_id)
-                .values(**update_data)
+                .values(**update_data,
+                        )
             )
             await self.db.commit()
             return await self.get_insurance_form_by_id(form_id)
@@ -83,7 +79,7 @@ class InsuranceFormRepository:
             if form:
                 self.db.delete(form)
                 await self.db.commit()
-            return form
+            return {"msg": "Insurance Form berhasil dihapus"}
         except SQLAlchemyError as e:
             await self.db.rollback()
             logger.error(f"[Repository Error][DELETE] {str(e)}", exc_info=True)

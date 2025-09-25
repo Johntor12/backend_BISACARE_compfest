@@ -1,13 +1,15 @@
 from domain.entities.claim import Claim
 from infrastructure.db.repositories.claim_repository import ClaimRepository
+from schemas.claim_schema import ClaimCreateRequest
+from infrastructure.db.models.claim_model import ClaimModel
 from fastapi import HTTPException
 
 class ClaimService:
     def __init__(self, claim_repository: ClaimRepository):
         self.claim_repository = claim_repository
 
-    async def create_claim(self, user_id: int, status: str) -> Claim:
-        new_claim = Claim(id=None, user_id=user_id, status=status)
+    async def create_claim(self, claim_req: ClaimCreateRequest, user_id: int, status: str) -> Claim:
+        new_claim = ClaimModel(**claim_req.dict(), user_id=user_id, status=status)
 
         return await self.claim_repository.create_claim(new_claim)
 

@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from infrastructure.db.connection import Base
+from infrastructure.db.models.insurance_form_model import InsuranceFormModel
+from typing import List
 
 class UserModel(Base):
     __tablename__ = "users"
@@ -15,7 +17,8 @@ class UserModel(Base):
     claims = relationship("ClaimModel", back_populates="user", uselist=False)
 
     insurance_forms = relationship("InsuranceFormModel", back_populates="user", cascade="all, delete-orphan")
-
+    aju_bandings = relationship("AjuBandingModel", back_populates="user", cascade="all, delete-orphan")
+    dokumen_invoices = relationship("DokumenInvoiceModel", back_populates="user", cascade="all, delete-orphan")
 
     #Relasi ke Slip Digital
     slips = relationship("SlipModel", back_populates="user", cascade="all, delete-orphan")

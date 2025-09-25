@@ -7,7 +7,7 @@ from application.usecases.testi_services import TestiService
 from infrastructure.db.repositories.testi_repository import TestiRepository
 from infrastructure.db.connection import get_db
 
-router = APIRouter(prefix="/testi", tags=["Testi"])
+router = APIRouter(tags=["Testi"])
 
 @router.post("/", response_model=Testi)
 async def create_testi(testi: Testi, db: AsyncSession = Depends(get_db)):

@@ -4,6 +4,7 @@ from typing import List
 
 from domain.entities.claim import Claim
 from application.usecases.claim_services import ClaimService
+from application.usecases.helper.get_current_user_service import get_current_user_service
 from infrastructure.db.repositories.claim_repository import ClaimRepository
 from infrastructure.db.connection import get_db
 
@@ -11,7 +12,7 @@ from infrastructure.db.connection import get_db
 router = APIRouter(prefix="/claims", tags=["Claims"])
 
 @router.post("/", response_model=Claim)
-async def create_claim(claim: Claim, db: AsyncSession = Depends(get_db)):
+async def create_claim(claim: Claim, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user_service)):
     repo = ClaimRepository(db)
     service = ClaimService(repo)
     return await service.create_claim(claim)
