@@ -35,7 +35,7 @@ async def register(data: UserCreate, db: AsyncSession = Depends(get_db)):
 @router.post("/login")
 async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     service = UserService()
-    token = await service.login(user.email, user.password, db)
+    token = await service.login(user.identifier, user.password, db)
     if not token:
         raise HTTPException(status_code=400, detail="Invalid credentials")
     return token

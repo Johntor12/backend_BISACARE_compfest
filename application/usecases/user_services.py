@@ -48,6 +48,7 @@ class UserService:
 
         user = await repo.get_by_identifier(identifier)  # async call
         if not user or not verify_password(password, user.password):  # sync call
+            print(f"[DEBUG] User not found: {identifier}")
             return HTTPException(status_code=401, detail="Email atau password salah")
         token = create_access_token({"sub": user.email})  # sync call
         return {"access_token": token, "token_type": "bearer"}

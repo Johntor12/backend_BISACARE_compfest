@@ -15,7 +15,7 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 class UserLogin(BaseModel):
-    email: str
+    identifier: str
     password: str
 
 class UserOut(BaseModel):
